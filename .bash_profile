@@ -5,7 +5,8 @@ CLICOLOR=true
 PAGER=less
 EDITOR=vim
 LESS="-Rsi"
-export PS1 CLICOLOR PAGER EDITOR LESS
+RBENV_ROOT=/usr/local/var/rbenv
+export PS1 CLICOLOR PAGER EDITOR LESS RBENV_ROOT
 
 alias ls="ls -FA"
 MANPATH=
@@ -31,3 +32,5 @@ git-new-workdir() {
     return 1
   fi
 }
+
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
