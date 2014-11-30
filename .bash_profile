@@ -24,9 +24,18 @@ git-new-workdir() {
     echo "$1 does not exist"
     return 1
   fi
-  new_workdir=$1-$2
+
+  pushd $1 > /dev/null
+  parent_branch="$(git branch | grep '^\*' | sed 's/^..//')"
+  if ! $(git branch | sed 's/^..//' | grep -q "^${2}$"); then
+    echo "Creating branch \"${2}\" from \"${parent_branch}\""
+    git branch "${2}" "${parent_branch}"
+  fi
+  popd > /dev/null
+
+  new_workdir=$1-${2}
   if /usr/local/share/git-core/contrib/workdir/git-new-workdir\
-    $1 $new_workdir $2; then
+    $1 $new_workdir ${2}; then
     echo "Created $new_workdir"
   else
     return 1
