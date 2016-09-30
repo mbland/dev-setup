@@ -6,7 +6,8 @@ PAGER=less
 EDITOR=vim
 LESS="-Rsi"
 PATH=$HOME/bin:/usr/local/mbland/bin:/usr/local/bin:$PATH
-export PS1 CLICOLOR PAGER EDITOR LESS PATH
+MANPATH=/usr/local/mbland/share/man:/usr/local/share/man:$MANPATH
+export PS1 CLICOLOR PAGER EDITOR LESS PATH MANPATH
 
 alias ls="ls -FA"
 alias pcpu='ps -eo pid,uid,pcpu,command | sort -rk 3'
@@ -48,7 +49,15 @@ git-changelog() {
 }
 
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-eval "$(~/src/mike-bland.com/go env blog)"
+eval "$(~/src/mbland/mbland-dotfiles/go env dots)"
+
+if [[ -x '~/src/mbland/mbland-dotfiles/go' ]]; then
+  eval "$(~/src/mbland/mbland-dotfiles/go env dots)"
+fi
+
+if [[ -x '~/src/mike-bland.com/go' ]]; then
+  eval "$(~/src/mike-bland.com/go env blog)"
+fi
 
 if [[ -r "$HOME/.bash_profile_local" ]]; then
   . "$HOME/.bash_profile_local"
