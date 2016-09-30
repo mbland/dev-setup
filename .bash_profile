@@ -5,12 +5,10 @@ CLICOLOR=true
 PAGER=less
 EDITOR=vim
 LESS="-Rsi"
-RBENV_ROOT=/usr/local/var/rbenv
-export PS1 CLICOLOR PAGER EDITOR LESS RBENV_ROOT
+PATH=$HOME/bin:/usr/local/mbland/bin:/usr/local/bin:$PATH
+export PS1 CLICOLOR PAGER EDITOR LESS PATH
 
 alias ls="ls -FA"
-MANPATH=
-
 alias pcpu='ps -eo pid,uid,pcpu,command | sort -rk 3'
 alias hostkey='ssh-keygen -l -f /etc/ssh_host_rsa_key'
 
@@ -33,13 +31,25 @@ git-new-workdir() {
   fi
   popd > /dev/null
 
-  new_workdir=$1-${2}
+  new_workdir="$1-$2"
   if /usr/local/share/git-core/contrib/workdir/git-new-workdir\
-    $1 $new_workdir ${2}; then
+    "$1" "$new_workdir" "$2"; then
     echo "Created $new_workdir"
   else
     return 1
   fi
 }
 
+git-changelog() {
+  local last_release_tag="$1"
+  local current_release_tag="$2"
+  git log --pretty=format:'%h %an <%ae>%n        %s%n' \
+    "${last_release_tag}..${current_release_tag}^"
+}
+
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+eval "$(~/src/mike-bland.com/go env blog)"
+
+if [[ -r "$HOME/.bash_profile_local" ]]; then
+  . "$HOME/.bash_profile_local"
+fi

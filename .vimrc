@@ -8,6 +8,11 @@
 " Author:  Mike Bland <mbland@acm.org>
 " Date:    2014-06-08
 
+" Enable the pathogen package manager:
+"   https://github.com/tpope/vim-pathogen
+"   https://gist.github.com/romainl/9970697
+execute pathogen#infect()
+
 " Turn on language syntax highlighting
 syntax on
 filetype on
@@ -29,16 +34,19 @@ set t_vb=
 set vb
 
 " Set maximum column width for formatting with gq commands
-set textwidth=78
+set textwidth=80
 
 " Hides a buffer (file) when abandoned rather than unloading it
 set hid
 
 set ts=2
 set expandtab
+set shiftwidth=2
 
 set statusline=%<%f\ %h%m%r%=%-12.(%l,%c%V%)\ %P
 set autoindent
+set smartindent
+set smarttab
 
 " Highlighted search
 set hlsearch
@@ -105,12 +113,32 @@ function Inc(header)
 endfunction
 command -nargs=1 Inc call Inc(<q-args>)
 
+" Syntastic:
+"   cd ~/.vim/bundle
+"   git clone https://github.com/scrooloose/syntastic
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ["eslint"]
+command Sr call SyntasticReset()
+
 " Blog template
 autocmd BufNewFile ~/src/mike-bland.com/*.textile 0r ~/src/mike-bland.com/_posts/new-post.textile
 autocmd BufNewFile,BufRead ~/src/mike-bland.com/*.textile setlocal spellfile+=~/src/mike-bland.com/_posts/google.utf-8.add,~/src/mike-bland.com/_posts/tags.utf-8.add
 autocmd BufNewFile,BufRead *.textile set textwidth=0
-autocmd BufNewFile,BufRead *.html,~/src/mike-bland.com/_includes/*.ext set textwidth=0 sw=2
-autocmd BufNewFile,BufRead *.go set noexpandtab ts=8
-autocmd BufNewFile,BufRead *.rb set sw=2
+autocmd BufNewFile,BufRead *.html,~/src/mike-bland.com/_includes/*.ext set textwidth=0
+autocmd BufNewFile,BufRead *.go set noexpandtab ts=8 sw=8
 autocmd BufNewFile,BufRead ~/src/mike-bland.com/{*/*.html,_includes/*.ext} set filetype=liquid
 autocmd Filetype html,xml,xsl,liquid source ~/.vim/scripts/closetag.vim
+
+" Polyglot language packs (requires Pathogen):
+"   cd ~/.vim/bundle
+"   git clone https://github.com/sheerun/vim-polyglot polyglot
+" Mustache/Handlebars pack:
+"   clone https://github.com/mustache/vim-mustache-handlebars mustache
+let g:mustache_abbreviations = 1
