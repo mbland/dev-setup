@@ -49,14 +49,13 @@ git-changelog() {
 }
 
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-eval "$(~/src/mbland/mbland-dotfiles/go env dots)"
 
-if [[ -x '~/src/mbland/mbland-dotfiles/go' ]]; then
-  eval "$(~/src/mbland/mbland-dotfiles/go env dots)"
+if [[ -x "$HOME/src/mbland/dotfiles/go" ]]; then
+  eval "$("$HOME/src/mbland/dotfiles/go" env dots)"
 fi
 
-if [[ -x '~/src/mike-bland.com/go' ]]; then
-  eval "$(~/src/mike-bland.com/go env blog)"
+if [[ -x "$HOME/src/mike-bland.com/go" ]]; then
+  eval "$("$HOME/src/mike-bland.com/go" env blog)"
 fi
 
 if [[ -r "$HOME/.bash_profile_local" ]]; then
