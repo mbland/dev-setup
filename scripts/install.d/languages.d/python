@@ -1,0 +1,34 @@
+#! /bin/bash
+#
+# Install pyenv and the latest Python version
+
+declare -r _PYENV_ROOT="$APP_SYS_ROOT/pyenv"
+declare -r _PYENV_VERSION='v20160202'
+declare -r _PYENV_PROFILE='/etc/profile.d/pyenv.sh'
+
+_install_pyenv() {
+  local orig_pwd="$PWD"
+  if [[ -f "$_PYENV_PROFILE" ]]; then
+    return
+  fi
+
+  git clone https://github.com/yyuu/pyenv.git "$_PYENV_ROOT"
+  cd "$_PYENV_ROOT"
+  git checkout "$_PYENV_VERSION" 2>/dev/null
+  echo "export PYENV_ROOT='$_PYENV_ROOT'" >>"$_PYENV_PROFILE"
+  echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >>"$_PYENV_PROFILE"
+  echo 'eval "$(pyenv init -)"' >>"$_PYENV_PROFILE"
+  chmod +x "$_PYENV_PROFILE"
+
+  cd "$orig_pwd"
+}
+
+_install_python() {
+  _install_pyenv
+  . "$_PYENV_PROFILE"
+  pyenv install $_PYTHON_VERSION
+  pyenv global $_PYTHON_VERSION
+  pip install --upgrade pip
+}
+
+_install_python

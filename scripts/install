@@ -1,0 +1,21 @@
+#! /bin/bash
+#
+# Set up the development environment for a new user account
+
+declare -r __INSTALL_SCRIPTS=('tools'
+  'languages'
+  'dotfiles'
+  'vim-packages'
+  'npm')
+
+_install() {
+  local script
+  @go.critical_section_begin
+
+  for script in "${__INSTALL_SCRIPTS[@]}"; do
+    @go.log_command @go install "$script"
+  done
+  @go.critical_section_end
+}
+
+_install

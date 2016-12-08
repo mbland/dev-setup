@@ -1,0 +1,18 @@
+#! /bin/bash
+#
+# Install the Pathogen package manager for Vim
+
+declare -r __PATHOGEN_FILE=".vim/autoload/pathogen.vim"
+
+_pathogen() {
+  if [[ -f "$HOME/$__PATHOGEN_FILE" ]]; then
+    echo "Already present: $__PATHOGEN_FILE"
+    return
+  fi
+  echo "Installing: $__PATHOGEN_FILE"
+  mkdir -p "$HOME/.vim/autoload" >/dev/null
+  mkdir -p "$HOME/.vim/bundle" >/dev/null
+  curl -LSso "$HOME/$__PATHOGEN_FILE" https://tpo.pe/pathogen.vim
+}
+
+_pathogen

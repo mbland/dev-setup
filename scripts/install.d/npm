@@ -1,0 +1,11 @@
+#! /bin/bash
+#
+# Install global npm modules
+
+NPMS=(
+  'livedown'
+  'node-inspector'
+  'yo'
+)
+
+npm install -g "${NPMS[@]}"

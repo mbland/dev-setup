@@ -1,0 +1,40 @@
+#! /bin/bash
+#
+# Install rbenv and the latest Ruby version
+
+declare -r _RBENV_ROOT="$APP_SYS_ROOT/rbenv"
+declare -r _RBENV_VERSION='v1.0.0'
+declare -r _RUBY_BUILD_VERSION='v20160228'
+declare -r _RBENV_PROFILE='/etc/profile.d/rbenv.sh'
+
+_install_rbenv() {
+  local orig_pwd="$PWD"
+  if [[ -f "$_RBENV_PROFILE" ]]; then
+    return
+  fi
+
+  git clone https://github.com/rbenv/rbenv.git "$_RBENV_ROOT"
+  cd "$_RBENV_ROOT"
+  git checkout "$_RBENV_VERSION" 2>/dev/null
+  mkdir "$_RBENV_ROOT/plugins"
+  export _RUBY_BUILD_ROOT="$_RBENV_ROOT/plugins/ruby-build"
+  git clone https://github.com/rbenv/ruby-build.git "$_RUBY_BUILD_ROOT"
+  cd "$_RUBY_BUILD_ROOT"
+  git checkout "$_RUBY_BUILD_VERSION" 2>/dev/null
+  echo "export RBENV_ROOT='$_RBENV_ROOT'" >>"$_RBENV_PROFILE"
+  echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >>"$_RBENV_PROFILE"
+  echo 'eval "$(rbenv init -)"' >>"$_RBENV_PROFILE"
+  chmod +x $_RBENV_PROFILE
+
+  cd "$orig_pwd"
+}
+
+_install_ruby() {
+  _install_rbenv
+  . "$_RBENV_PROFILE"
+  rbenv install "$_RUBY_VERSION"
+  rbenv global "$_RUBY_VERSION"
+  gem install bundler colorator
+}
+
+_install_ruby

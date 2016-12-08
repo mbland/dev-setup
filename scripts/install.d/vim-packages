@@ -1,0 +1,63 @@
+#! /bin/bash
+#
+# Install Vim packages into the Pathogen $HOME/.vim/bundle directory
+
+declare -r __PATHOGEN_PACKAGE_REPOS=('scrooloose/syntastic'
+  'sheerun/vim-polyglot'
+  'shime/vim-livedown'
+  'editorconfig/editorconfig-vim')
+
+_vim_install_script_package() {
+  local script_package="$scripts_dir/$1"
+  local script_url="$2"
+
+  if [[ -f "$HOME/$script_package" ]]; then
+    echo "Already present: $script_package"
+  else
+    echo "Installing: $script_package"
+    curl -LSso "$HOME/$script_package" "$script_url"
+  fi
+}
+
+_vim_script_packages() {
+  local scripts_dir=".vim/scripts"
+
+  if [[ ! -d "$HOME/$scripts_dir" ]]; then
+    mkdir -p "$HOME/$scripts_dir"
+  fi
+
+  _vim_install_script_package 'closetag.vim' \
+      'http://www.vim.org/scripts/download_script.php?src_id=4318'
+}
+
+_vim_pathogen_packages() {
+  local package_repo
+  local package_name
+  local old_pwd="$PWD"
+
+  if ! @go install pathogen; then
+    exit 1
+  fi
+
+  cd "$HOME/.vim/bundle"
+
+  for package_repo in "${__PATHOGEN_PACKAGE_REPOS[@]}"; do
+    package_name="${package_repo##*/}"
+    package_name="${package_name#vim-}"
+    package_name="${package_name%-vim}"
+    if [[ -d "$package_name" ]]; then
+      echo "Already present: .vim/bundle/$package_name"
+    else
+      echo "Installing: .vim/bundle/$package_name"
+      git clone "git@github.com:$package_repo.git" "$package_name"
+    fi
+  done
+  cd "$old_pwd"
+}
+
+_vim_packages() {
+  _vim_script_packages
+  _vim_pathogen_packages
+}
+
+_vim_packages

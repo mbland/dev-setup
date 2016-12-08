@@ -1,0 +1,33 @@
+#! /bin/bash
+#
+# Install language version managers
+
+declare -r APP_SYS_ROOT='/usr/local/mbland'
+declare -r _GO_VERSION='go1.6'
+declare -r _RUBY_VERSION='2.3.0'
+declare -r _PYTHON_VERSION='3.5.1'
+declare -r _NODE_VERSION='5.7.1'
+
+_languages() {
+  local language
+
+  if [ ! -d $APP_SYS_ROOT ]; then
+    mkdir -p $APP_SYS_ROOT
+  fi
+
+  if [ ! -d /etc/profile.d ]; then
+    mkdir /etc/profile.d
+    cat >>/etc/profile <<'END_PROFILE'
+for script in /etc/profile.d/*.sh
+do
+  . $script
+done
+END_PROFILE
+  fi
+
+  for language in ruby python node go; do
+    @go install languages "$language"
+  done
+}
+
+_languages

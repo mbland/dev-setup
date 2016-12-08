@@ -1,0 +1,35 @@
+#! /bin/bash
+#
+# Install dotfiles for a new user account
+
+declare _DOTFILES=()
+
+if shopt -s globstar 2>/dev/null; then
+  GLOBIGNORE=".git*:.*.swp:.DS_Store:*/**/.*.swp:*/**/.DS_Store"
+  shopt -u globstar
+else
+  GLOBIGNORE=".git*:*.*.swp:*.DS_Store"
+fi
+
+_find_dotfiles() {
+  local _dotfile
+  for _dotfile in "$@"; do
+    if [[ ! -d "$_dotfile" ]]; then
+      _DOTFILES+=("$_dotfile")
+    else
+      _find_dotfiles $_dotfile/*
+    fi
+  done
+}
+
+_dotfiles() {
+  local dotfile
+
+  _find_dotfiles .*
+
+  for dotfile in "${_DOTFILES[@]}"; do
+    echo "Installing: $dotfile"
+  done
+}
+
+_dotfiles

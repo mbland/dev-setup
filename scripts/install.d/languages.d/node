@@ -1,0 +1,31 @@
+#! /bin/bash
+#
+# Install nvm and the latest Node.js version
+
+declare -r _NVM_ROOT="$APP_SYS_ROOT/nvm"
+declare -r _NVM_VERSION='v0.31.0'
+declare -r _NVM_PROFILE='/etc/profile.d/nvm.sh'
+
+_install_nvm() {
+  local orig_pwd="$PWD"
+  if [[ -f "$_NVM_PROFILE" ]]; then
+    return
+  fi
+
+  git clone https://github.com/creationix/nvm.git $_NVM_ROOT
+  cd "$_NVM_ROOT"
+  git checkout "$_NVM_VERSION" 2>/dev/null
+  echo ". '$_NVM_ROOT/nvm.sh'" >>"$_NVM_PROFILE"
+  chmod +x "$_NVM_PROFILE"
+
+  cd "$orig_pwd"
+}
+
+_install_node() {
+  _install_nvm
+  . "$_NVM_PROFILE"
+  nvm install "$_NODE_VERSION"
+  nvm 'alias' 'default' "$_NODE_VERSION"
+}
+
+_install_node

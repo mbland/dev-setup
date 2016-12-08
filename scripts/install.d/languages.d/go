@@ -1,0 +1,33 @@
+#! /bin/bash
+#
+# Install gvm and the latest Go version
+
+declare -r _GVM_ROOT="$APP_SYS_ROOT/gvm"
+declare -r _GVM_VERSION='25ea8ae158e2861c92e2b22c458e60840157832f'
+declare -r _GVM_PROFILE='/etc/profile.d/gvm.sh'
+
+_install_gvm() {
+  if [[ -f "$_GVM_PROFILE" ]]; then
+    return
+  fi
+
+  curl -L -O \
+    https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
+  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$_GVM_VERSION" \
+    "$APP_SYS_ROOT"
+  rm ./gvm-installer
+  echo ". '$_GVM_ROOT/scripts/gvm'" >>"$_GVM_PROFILE"
+  chmod +x "$_GVM_PROFILE"
+}
+
+_install_go() {
+  _install_gvm
+  . "$_GVM_PROFILE"
+  gvm install go1.4.3
+  gvm use go1.4.3
+  gvm install $_GO_VERSION
+  gvm use $_GO_VERSION --default
+  gvm uninstall go1.4.3
+}
+
+_install_go

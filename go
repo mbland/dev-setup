@@ -1,27 +1,10 @@
 #! /usr/bin/env bash
 
 . "${0%/*}/scripts/go-script-bash/go-core.bash" "scripts"
+. "$_GO_USE_MODULES" 'log'
 
-declare -x _DOTFILES=()
-
-if shopt -s globstar 2>/dev/null; then
-  GLOBIGNORE=".git*:.*.swp:.DS_Store:*/**/.*.swp:*/**/.DS_Store"
-  shopt -u globstar
+if [[ "$#" -eq 0 ]]; then
+  @go.setup_project 'install'
 else
-  GLOBIGNORE=".git*:*.*.swp:*.DS_Store"
+  @go "$@"
 fi
-
-find_dotfiles() {
-  local _dotfile
-  for _dotfile in "$@"; do
-    if [[ ! -d "$_dotfile" ]]; then
-      _DOTFILES+=("$_dotfile")
-    else
-      find_dotfiles $_dotfile/*
-    fi
-  done
-}
-
-find_dotfiles .*
-
-@go "$@"
