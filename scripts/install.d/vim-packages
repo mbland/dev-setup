@@ -1,63 +1,100 @@
 #! /bin/bash
 #
-# Install Vim packages into the Pathogen $HOME/.vim/bundle directory
+# Install Vim packages into the $HOME/.vim directory
+#
+# Globals:
+#   VIM_SCRIPTS:
+#     Array of strings of the format "<script-path>|<script-download-url>"
+#     where <script-path> is relative to $HOME/.vim
+#   VIM_PATHOGEN_BUNDLE_REPOS:
+#     Array of GitHub repos for Pathogen packages of the form "<user>/<repo>"
 
-declare -r __PATHOGEN_PACKAGE_REPOS=('scrooloose/syntastic'
-  'sheerun/vim-polyglot'
-  'shime/vim-livedown'
-  'editorconfig/editorconfig-vim')
+declare -r __PATHOGEN_URL='https://tpo.pe/pathogen.vim'
+declare -r __PATHOGEN_FILE='.vim/autoload/pathogen.vim'
+declare -r __PATHOGEN_BUNDLE_DIR='.vim/bundle'
 
-_vim_install_script_package() {
-  local script_package="$scripts_dir/$1"
-  local script_url="$2"
+_install_vim_scripts() {
+  local script_spec
+  local script_url
+  local script_path
+  local script_abs_path
+  local script_abs_parent_path
 
-  if [[ -f "$HOME/$script_package" ]]; then
-    echo "Already present: $script_package"
-  else
-    echo "Installing: $script_package"
-    curl -LSso "$HOME/$script_package" "$script_url"
-  fi
-}
-
-_vim_script_packages() {
-  local scripts_dir=".vim/scripts"
-
-  if [[ ! -d "$HOME/$scripts_dir" ]]; then
-    mkdir -p "$HOME/$scripts_dir"
+  if [[ "$#" -eq 0 ]]; then
+    return
   fi
 
-  _vim_install_script_package 'closetag.vim' \
-      'http://www.vim.org/scripts/download_script.php?src_id=4318'
+  for script_spec in "${VIM_SCRIPTS}"; do
+    script_path="${script_spec%%|*}"
+    script_url="${script_spec#*|}"
+    script_abs_path="$HOME/.vim/$script_path"
+    script_abs_parent_path="${script_abs_path%/*}"
+
+    if [[ ! -d "$script_abs_parent_path" ]]; then
+      mkdir -p "$script_abs_parent_path"
+    fi
+
+    if [[ -f "$script_abs_path" ]]; then
+      echo "Already present: .vim/$script_path"
+    else
+      echo "Installing: .vim/$script_path from $script_url"
+      curl -LSso "$script_abs_path" "$script_url"
+    fi
+  done
 }
 
-_vim_pathogen_packages() {
+_install_vim_pathogen() {
+  local pathogen_file="$HOME/$__PATHOGEN_FILE"
+  local pathogen_dir="${pathogen_file%/*}"
+  local target_dir
+
+  if [[ -f "$pathogen_file" ]]; then
+    echo "Already present: $__PATHOGEN_FILE"
+    return
+  fi
+
+  echo "Installing: $__PATHOGEN_FILE"
+
+  if [[ ! -d "$pathogen_dir" ]]; then
+    mkdir -p "${pathogen_dir}"
+  fi
+  curl -LSso "$pathogen_file" "$__PATHOGEN_URL"
+}
+
+_install_vim_pathogen_packages() {
+  local pathogen_package_dir="$HOME/$__PATHOGEN_BUNDLE_DIR"
   local package_repo
   local package_name
-  local old_pwd="$PWD"
+  local package_path
 
-  if ! @go install pathogen; then
-    exit 1
+  if [[ "$#" -eq '0' ]]; then
+    return
   fi
 
-  cd "$HOME/.vim/bundle"
+  _install_vim_pathogen
 
-  for package_repo in "${__PATHOGEN_PACKAGE_REPOS[@]}"; do
+  if [[ ! -d "$pathogen_package_dir" ]]; then
+    mkdir -p "${pathogen_package_dir}"
+  fi
+
+  for package_repo in "$@"; do
     package_name="${package_repo##*/}"
     package_name="${package_name#vim-}"
     package_name="${package_name%-vim}"
-    if [[ -d "$package_name" ]]; then
-      echo "Already present: .vim/bundle/$package_name"
+    package_path="$pathogen_package_dir/$package_name"
+
+    if [[ -d "$package_path" ]]; then
+      echo "Already present: $__PATHOGEN_BUNDLE_DIR/$package_name"
     else
-      echo "Installing: .vim/bundle/$package_name"
-      git clone "git@github.com:$package_repo.git" "$package_name"
+      echo "Installing: $__PATHOGEN_BUNDLE_DIR/$package_name"
+      git clone "git@github.com:$package_repo.git" "$package_path"
     fi
   done
-  cd "$old_pwd"
 }
 
-_vim_packages() {
-  _vim_script_packages
-  _vim_pathogen_packages
+_install_vim_packages() {
+  _install_vim_scripts "${VIM_SCRIPTS[@]}"
+  _install_vim_pathogen_packages "${VIM_PATHOGEN_BUNDLE_REPOS[@]}"
 }
 
-_vim_packages
+_install_vim_packages

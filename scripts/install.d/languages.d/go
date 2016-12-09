@@ -1,33 +1,51 @@
 #! /bin/bash
 #
 # Install gvm and the latest Go version
+#
+# Usage: {{go}} {{cmd}} <app-sys-root> <go-version> [<gvm-version>]
+#
+# Where:
+#   <app-sys-root>  Path to parent directory in which to install gvm
+#   <go-version>    Version of Go to install via gvm
+#   <gvm-version>   Tag or commit has of gvm version to install
+#
+# Will install gvm in `<app-sys-root>/gvm` and add `/etc/profile.d/gvm.sh`.
 
-declare -r _GVM_ROOT="$APP_SYS_ROOT/gvm"
-declare -r _GVM_VERSION='25ea8ae158e2861c92e2b22c458e60840157832f'
 declare -r _GVM_PROFILE='/etc/profile.d/gvm.sh'
+declare -r _GVM_INSTALLER_URL='https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer'
 
 _install_gvm() {
+  local app_sys_root="$1"
+  local gvm_dir="$app_sys_root/gvm"
+  local gvm_version="$2"
+
   if [[ -f "$_GVM_PROFILE" ]]; then
     return
   fi
 
-  curl -L -O \
-    https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer
-  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$_GVM_VERSION" \
-    "$APP_SYS_ROOT"
+  curl -L -O "$_GVM_INSTALLER_URL"
+  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$gvm_version" "$app_sys_root"
   rm ./gvm-installer
-  echo ". '$_GVM_ROOT/scripts/gvm'" >>"$_GVM_PROFILE"
+  echo ". '$gvm_dir/scripts/gvm'" >>"$_GVM_PROFILE"
   chmod +x "$_GVM_PROFILE"
 }
 
 _install_go() {
-  _install_gvm
+  local app_sys_root="$1"
+  local go_version="$2"
+  local gvm_version="$3"
+
+  if [[ -z "$go_version" ]]; then
+    return
+  fi
+
+  _install_gvm "$app_sys_root" "$gvm_version"
   . "$_GVM_PROFILE"
   gvm install go1.4.3
   gvm use go1.4.3
-  gvm install $_GO_VERSION
-  gvm use $_GO_VERSION --default
+  gvm install $go_version
+  gvm use $go_version --default
   gvm uninstall go1.4.3
 }
 
-_install_go
+_install_go "$@"

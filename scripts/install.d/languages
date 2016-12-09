@@ -1,18 +1,25 @@
 #! /bin/bash
 #
 # Install language version managers
-
-declare -r APP_SYS_ROOT='/usr/local/mbland'
-declare -r _GO_VERSION='go1.6'
-declare -r _RUBY_VERSION='2.3.0'
-declare -r _PYTHON_VERSION='3.5.1'
-declare -r _NODE_VERSION='5.7.1'
+#
+# Usage:  {{go}} {{cmd}} <app-sys-root>
+#
+# Globals:
+#   GO_VERSION:      Version of Go to install
+#   GVM_VERSION:     Tag or commit hash of gvm version to install
+#   NODEJS_VERSION:  Version of Node.js to install
+#   NVM_VERSION:     Tag or commit hash of nvm version to install
+#   PYTHON_VERSION:  Version of Python to install
+#   PYENV_VERSION:   Tag or commit hash of pyenv version to install
+#   RUBY_VERSION:    Version of Ruby to install
+#   RBENV_VERSION:   Tag or commit hash of rbenv version to install
 
 _languages() {
+  local app_sys_root="$1"
   local language
 
-  if [ ! -d $APP_SYS_ROOT ]; then
-    mkdir -p $APP_SYS_ROOT
+  if [ ! -d $app_sys_root ]; then
+    mkdir -p $app_sys_root
   fi
 
   if [ ! -d /etc/profile.d ]; then
@@ -25,9 +32,10 @@ done
 END_PROFILE
   fi
 
-  for language in ruby python node go; do
-    @go install languages "$language"
-  done
+  @go install languages "go" "$GO_VERSION" "$GVM_VERSION"
+  @go install languages "node" "$NODEJS_VERSION" "$NVM_VERSION"
+  @go install languages "python" "$PYTHON_VERSION" "$PYENV_VERSION"
+  @go install languages "ruby" "$RUBY_VERSION" "$RBENV_VERSION"
 }
 
-_languages
+_languages "$@"
