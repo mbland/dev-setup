@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+#
+# Install packages on macOS
+
+export PACKAGE_INSTALL_COMMAND=('brew' 'install')
+export PLATFORM_PACKAGES=(
+  'libyaml'
+  'libzip'
+  'pcre'
+  'reattach-to-user-namespace'
+  'xz'
+)
+
+platform_pre_install() {
+  if [[ ! -d '/Applications/Xcode.app' ]]; then
+    echo "Please install Xcode and run this script again."
+    echo "Opening the App Store to install Xcode..."
+    sleep 2
+    open https://appstore.com/mac/apple/Xcode
+    return 1
+  elif ! command -v 'brew' >/dev/null; then
+    xcode-select --install
+    echo "Installing Homebrew..."
+    if ! /usr/bin/ruby -e "$(curl -fsSL $__BREW_INSTALL_URL)"; then
+      echo "Failed to install Homebrew" 2>&1
+      return 1
+    fi
+  fi
+
+  brew update
+  brew upgrade
+  brew cleanup --force -s
+  brew cask install tcl
+}

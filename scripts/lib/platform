@@ -1,0 +1,46 @@
+#! /bin/bash
+#
+# Sets the `PLATFORM_*` family of environment variables for the host platform
+#
+# Uses /etc/os-release if present. See:
+# https://www.freedesktop.org/software/systemd/man/os-release.html
+#
+# Otherwise only `PLATFORM_ID` is set to 'macos' if the Bash variable `OSTYPE`
+# is 'darwin', and to `OSTYPE` in all other cases.
+
+export ETC_OS_RELEASE="${ETC_OS_RELEASE:-/etc/os-release}"
+
+_platform_read_os_release() {
+  local line
+
+  if [[ ! -f "$ETC_OS_RELEASE" ]]; then
+    return 1
+  fi
+
+  while read -r line; do
+    line="${line%$'\r'}"
+    if [[ "$line" =~ ^[^#]+= ]]; then
+      printf -v "PLATFORM_${line%%=*}" '%s' "${line#*=}"
+    fi
+  done <"$ETC_OS_RELEASE"
+}
+
+_platform_use_ostype() {
+  case "$OSTYPE" in
+  darwin*)
+    PLATFORM_ID='macos' 
+    ;;
+  *)
+    PLATFORM_ID="$OSTYPE"
+    ;;
+  esac
+}
+
+_platform() {
+  if ! _platform_read_os_release; then
+    _platform_use_ostype
+  fi
+  export "${!PLATFORM_@}"
+}
+
+_platform "$@"

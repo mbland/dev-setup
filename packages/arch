@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+#
+# Install packages on Arch Linux
+
+export PACKAGE_INSTALL_COMMAND=('sudo' 'pacman' '-Syuu')
+export PLATFORM_PACKAGES=(
+  'readline'
+  'xz'
+)

@@ -2,19 +2,38 @@
 #
 # Set up the development environment for a new user account
 
-declare -r __INSTALL_SCRIPTS=('tools'
+declare -r __INSTALL_SCRIPTS=('packages'
   'languages'
   'vim-packages'
   'npm')
 
+_install_tab_completions() {
+  local word_index="$1"
+  shift
+
+  if [[ "$word_index" -eq '0' ]]; then
+    echo '--vm'
+  fi
+}
+
 _install() {
   local script
+
+  case "$1" in
+  --complete)
+    # Tab completions
+    shift
+    _install_tab_completions "$@"
+    return
+    ;;
+  esac
+
   @go.critical_section_begin
 
   for script in "${__INSTALL_SCRIPTS[@]}"; do
-    @go.log_command @go install "$script"
+    @go.log_command @go "${_GO_CMD_NAME[@]}" "$script" "$@"
   done
   @go.critical_section_end
 }
 
-_install
+_install "$@"

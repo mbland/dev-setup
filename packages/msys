@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+#
+# Install packages on MSYS2 Linux (Windows)
+
+export PACKAGE_INSTALL_COMMAND=('sudo' 'pacman' '-Syuu')
+export PLATFORM_PACKAGES=(
+  'readline'
+  'xz'
+)

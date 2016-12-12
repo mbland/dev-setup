@@ -1,0 +1,101 @@
+#! /bin/bash
+#
+# Install tool packages
+
+_packages_tab_completions() {
+  local word_index="$1"
+  shift
+
+  if [[ "$word_index" -eq '0' ]]; then
+    echo '--vm'
+  fi
+}
+
+_packages_install_sudo_if_necessary() {
+  case "$PLATFORM_ID" in
+  macos|msys)
+    return
+    ;;
+  esac
+
+  if command -v sudo >/dev/null; then
+    return
+  fi
+
+  @go.printf '%s %s\n' 'Installing sudo as root, ' \
+    'then running visudo to add yourself to the sudoers file.'
+
+  if ! su root -c "${PACKAGE_INSTALL_COMMAND[@]}" sudo &&
+    ! su root -c visudo; then
+    @go.printf '%s %s\n' 'Failed to install sudo or update the sudoers '
+      'file; please take care of this manually and try again.'
+    return 1
+  fi
+}
+
+_packages_install() {
+  printf '%s\n' "${PACKAGE_INSTALL_COMMAND[*]}"
+  printf '  %s\n' "$@"
+  "${PACKAGE_INSTALL_COMMAND[@]}" "$@"
+}
+
+_packages_install_missing() {
+  local packages=()
+
+  for package in "${PACKAGES_ADD_IF_MISSING[@]}"; do
+    if ! command -v "$package" >/dev/null; then
+      packages+=("$package")
+    fi
+  done
+
+  if [[ "${#packages[@]}" -ne '0' ]]; then
+    @go.log START  install packages not yet installed
+    _packages_install "${packages[@]}"
+    @go.log FINISH install packages not yet installed
+  fi
+}
+
+_packages() {
+  local packages=("${PACKAGES[@]}")
+  local package
+  local vm_install
+
+  case "$1" in
+  --complete)
+    # Tab completions
+    shift
+    _packages_tab_completions "$@"
+    return
+    ;;
+  --vm)
+    vm_install='true'
+    ;;
+  esac
+
+  . "$_GO_USE_MODULES" 'platform'
+  . "packages/$PLATFORM_ID"
+
+  _packages_install_sudo_if_necessary
+
+  packages+=("${PLATFORM_PACKAGES[@]}")
+
+  if declare -F platform_pre_install >/dev/null; then
+    @go.log START pre-install hook
+    platform_pre_install
+    @go.log FINISH pre-install hook
+  fi
+
+  if [[ -n "$vm_install" ]] && declare -F platform_vm_install >/dev/null; then
+    @go.log START virtual machine install hook
+    platform_vm_install
+    @go.log FINISH virtual machine install hook
+  fi
+
+  @go.log START  install packages
+  _packages_install "${packages[@]}"
+  @go.log FINISH install packages
+
+  _packages_install_missing
+}
+
+_packages "$@"

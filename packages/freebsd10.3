@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+#
+# Install packages on FreeBSD 10.3
+
+export PACKAGE_INSTALL_COMMAND=('pkg' 'install')
+export PLATFORM_PACKAGES=(
+  'readline'
+  'xz'
+)
+
+platform_pre_install() {
+  sudo pkg upgrade -v
+}
