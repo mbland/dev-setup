@@ -15,11 +15,10 @@
 #   RBENV_VERSION:   Tag or commit hash of rbenv version to install
 
 _languages() {
-  local app_sys_root="$1"
   local language
 
-  if [ ! -d $app_sys_root ]; then
-    mkdir -p $app_sys_root
+  if [ ! -d $APPS_ROOT ]; then
+    mkdir -p $APPS_ROOT
   fi
 
   if [ ! -d /etc/profile.d ]; then
@@ -32,10 +31,9 @@ done
 END_PROFILE
   fi
 
-  @go install languages "go" "$GO_VERSION" "$GVM_VERSION"
-  @go install languages "node" "$NODEJS_VERSION" "$NVM_VERSION"
-  @go install languages "python" "$PYTHON_VERSION" "$PYENV_VERSION"
-  @go install languages "ruby" "$RUBY_VERSION" "$RBENV_VERSION"
+  for language in "${INSTALL_LANGUAGES[@]}"; do
+    @go install languages "$language"
+  done
 }
 
 _languages "$@"

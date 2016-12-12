@@ -2,49 +2,56 @@
 #
 # Install gvm and the latest Go version
 #
-# Usage: {{go}} {{cmd}} <app-sys-root> <go-version> [<gvm-version>]
+# Usage: {{go}} {{cmd}}
 #
-# Where:
-#   <app-sys-root>  Path to parent directory in which to install gvm
-#   <go-version>    Version of Go to install via gvm
-#   <gvm-version>   Tag or commit has of gvm version to install
+# Globals:
+#   APPS_ROOT    Path to parent directory in which to install gvm
+#   GO_VERSION   Version of Go to install via gvm
+#   GVM_VERSION  Tag or commit has of gvm version to install
 #
-# Will install gvm in `<app-sys-root>/gvm` and add `/etc/profile.d/gvm.sh`.
+# Will install gvm in `$APPS_ROOT/gvm` and add `/etc/profile.d/gvm.sh`.
 
 declare -r _GVM_PROFILE='/etc/profile.d/gvm.sh'
 declare -r _GVM_INSTALLER_URL='https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer'
+declare -r _GO_NO_PIC_PATCH_URL='https://github.com/docker-library/golang/blob/master/1.7/alpine/no-pic.patch'
+declare -r _GO_NO_PIC_PATCH_PATH="$PATCHES_PATH/go/alpine/no-pic.patch"
+declare -r _GVM_COMPILE_GO_PATCH_PATH="$PATCHES_PATH/gvm/compile_go.patch"
 
 _install_gvm() {
-  local app_sys_root="$1"
-  local gvm_dir="$app_sys_root/gvm"
-  local gvm_version="$2"
+  local gvm_dir="$APPS_ROOT/gvm"
 
-  if [[ -f "$_GVM_PROFILE" ]]; then
-    return
-  fi
-
+  # TODO(mbland): Remove SRC_REPO if/when patch support is merged into
+  # moovweb/gvm.
   curl -L -O "$_GVM_INSTALLER_URL"
-  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$gvm_version" "$app_sys_root"
+  GVM_NO_UPDATE_PROFILE='true' SRC_REPO='https://github.com/mbland/gvm.git' \
+    bash ./gvm-installer "$GVM_VERSION" "$APPS_ROOT"
   rm ./gvm-installer
-  echo ". '$gvm_dir/scripts/gvm'" >>"$_GVM_PROFILE"
+
+  echo ". '$gvm_dir/scripts/gvm'" >"$_GVM_PROFILE"
   chmod +x "$_GVM_PROFILE"
 }
 
 _install_go() {
-  local app_sys_root="$1"
-  local go_version="$2"
-  local gvm_version="$3"
-
-  if [[ -z "$go_version" ]]; then
-    return
+  if [[ -z "$GO_VERSION" ]]; then
+    echo "GO_VERSION not defined." >&2
+    return 1
   fi
 
-  _install_gvm "$app_sys_root" "$gvm_version"
+  _install_gvm
   . "$_GVM_PROFILE"
-  gvm install go1.4.3
+
+  if ! gvm install go1.4.3; then
+    return 1
+  fi
   gvm use go1.4.3
-  gvm install $go_version
-  gvm use $go_version --default
+  export GOROOT_BOOTSTRAP="$GOROOT"
+
+  if ! gvm install "$GO_VERSION"; then
+    return 1
+  fi
+  export GOROOT_BOOTSTRAP=
+
+  gvm use "$GO_VERSION" --default
   gvm uninstall go1.4.3
 }
 

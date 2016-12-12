@@ -2,17 +2,19 @@
 #
 # Install tool packages
 
-declare __TOOLS=('git' 'vim' 'tmux' 'jq')
+declare __TOOLS=('git' 'vim' 'tmux' 'jq' 'mercurial')
 declare __ADD_IF_MISSING=(
   'curl'
   'gcc'
   'clang'
+  'less'
   'make'
+  'ncurses'
   'file'
   'perl'
   'openssl'
   'bison'
-  'sqlite3'
+  'sqlite'
   'bzip2'
 )
 declare __BUILD_SUPPORT=()
@@ -82,7 +84,8 @@ _update_os_and_setup_package_install_command() {
     __OS_PACKAGE_INSTALL_COMMAND+=('apk' 'add')
     apk update -v
     apk upgrade -v
-    __BUILD_SUPPORT+=('readline' 'xz')
+    __BUILD_SUPPORT+=('ca-certificates' 'libc-dev' 'linux-headers' 'readline'
+      'xz')
 
   # OS X/macOS
   elif command -v 'brew' >/dev/null; then
