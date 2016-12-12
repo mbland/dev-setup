@@ -1,0 +1,53 @@
+#! /bin/bash
+#
+# Detects the installation platform
+#
+# Usage: {{go}} {{cmd}} [-q]
+#
+# Where:
+#   -q  Do not echo `$PLATFORM` to standard output
+#
+# Sets the `PLATFORM` variable when sourced and echoes its value to standard
+# output (unless `-q` is given). Returns an error status if the platform is
+# unknown.
+
+_platform() {
+  local flag="$1"
+  shift
+
+  case "$flag" in
+  --complete)
+    # Tab completions
+    if [[ "$1" -eq '0' ]]; then
+      echo '-q'
+    fi
+    return
+    ;;
+  -q|'')
+    ;;
+  *)
+    echo "Unknown flag: $flag" >&2
+    return 1
+    ;;
+  esac
+
+  if [[ "$OSTYPE" =~ ^darwin ]]; then
+    PLATFORM='macos' 
+  elif command -v 'apt-get' >/dev/null; then
+    PLATFORM='debian'
+  elif command -v 'pacman' >/dev/null; then
+    PLATFORM='arch'
+  elif command -v 'pkg' >/dev/null; then
+    PLATFORM='freebsd'
+  elif command -v 'apk' >/dev/null; then
+    PLATFORM='alpine'
+  fi
+
+  if [[ -z "$PLATFORM" ]]; then
+    return 1
+  elif [[ "$flag" != '-q' ]]; then
+    echo "$PLATFORM"
+  fi
+}
+
+_platform "$@"
