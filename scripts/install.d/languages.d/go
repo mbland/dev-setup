@@ -18,8 +18,6 @@ declare -r _GO_NO_PIC_PATCH_PATH="$PATCHES_PATH/go/alpine/no-pic.patch"
 declare -r _GVM_COMPILE_GO_PATCH_PATH="$PATCHES_PATH/gvm/compile_go.patch"
 
 _install_gvm() {
-  local gvm_dir="$APPS_ROOT/gvm"
-
   # TODO(mbland): Remove SRC_REPO if/when patch support is merged into
   # moovweb/gvm.
   curl -L -O "$_GVM_INSTALLER_URL"
@@ -27,7 +25,7 @@ _install_gvm() {
     bash ./gvm-installer "$GVM_VERSION" "$APPS_ROOT"
   rm ./gvm-installer
 
-  echo ". '$gvm_dir/scripts/gvm'" >"$_GVM_PROFILE"
+  echo ". '$APPS_ROOT/gvm/scripts/gvm'" >"$_GVM_PROFILE"
   chmod +x "$_GVM_PROFILE"
 }
 
@@ -53,6 +51,9 @@ _install_go() {
 
   gvm use "$GO_VERSION" --default
   gvm uninstall go1.4.3
+
+  echo "gvm installed at $APPS_ROOT/gvm"
+  echo "Test the installation by running: go tool dist test -no-rebuild"
 }
 
 _install_go "$@"
