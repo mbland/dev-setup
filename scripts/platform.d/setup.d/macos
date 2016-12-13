@@ -1,0 +1,39 @@
+#! /bin/bash
+#
+# Sets up Xcode and Homebrew on macos
+
+declare -r __BREW_INSTALL_URL='https://raw.githubusercontent.com/Homebrew/install/master/install'
+
+declare -r __BREW_CASK_PACKAGES=('tcl')
+
+_set_up_macos() {
+  local cask_pkg
+
+  if [[ ! -d '/Applications/Xcode.app' ]]; then
+    echo "Please install Xcode and run this script again."
+    echo "Opening the App Store to install Xcode..."
+    sleep 2
+    open https://appstore.com/mac/apple/Xcode
+    return 1
+  fi
+
+  if ! command -v 'brew' >/dev/null; then
+    xcode-select --install
+    echo "Installing Homebrew..."
+    if ! /usr/bin/ruby -e "$(curl -fsSL $__BREW_INSTALL_URL)"; then
+      echo "Failed to install Homebrew" 2>&1
+      return 1
+    fi
+  else
+    brew update
+    brew upgrade
+    brew cleanup --force -s
+  fi
+
+  for cask_pkg in "$__BREW_CASK_PACKAGES"; do
+    brew cask install "$cask_pkg"
+  done
+  brew install 'libyaml' 'libzip' 'pcre' 'reattach-to-user-namespace' 'xz' "$@"
+}
+
+_set_up_macos "$@"

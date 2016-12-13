@@ -1,0 +1,18 @@
+#! /bin/bash
+#
+# Installs the base packages and tools for the host platform
+#
+# GLOBALS:
+
+_setup() {
+  local PLATFORM=''
+  @go platform -q
+
+  if [[ -z "$PLATFORM" ]]; then
+    @go.log FATAL "Can't set up unknown platform."
+  fi
+
+  @go platform setup "$PLATFORM"
+}
+
+_setup

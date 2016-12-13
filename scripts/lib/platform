@@ -1,0 +1,52 @@
+#! /bin/bash
+#
+# Library defining the run_setup_command function
+
+__check_platform_defined() {
+  if [[ -z "$PLATFORM" ]]; then
+    @go.log FATAL 'PLATFORM not defined'
+  fi
+}
+
+run_setup_command() {
+  if [[ -z "$__PLATFORM_SETUP_USE_SUDO" ]]; then
+    __check_platform_defined
+    if [[ "$PLATFORM" != 'macos' ]] && command -v 'sudo' >/dev/null; then
+      __PLATFORM_SETUP_USE_SUDO='true'
+    else
+      __PLATFORM_SETUP_USE_SUDO='false'
+    fi
+    export USE_SUDO
+  fi
+
+  if [[ "$__PLATFORM_SETUP_USE_SUDO" == 'true' ]]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
+
+setup_tools_packages() {
+  local tools_to_install=("${TOOLS[@]}")
+  local tools_packages=()
+  local tool
+  local package_ref
+
+  __check_platform_defined
+
+  for tool in "${TOOLS_ADD_IF_MISSING[@]}"; do
+    if ! command -v "$tool" >/dev/null; then
+      tools_to_install+=("$tool")
+    fi
+  done
+
+  for tool in "${tools_to_install[@]}"; do
+    package_ref="${PLATFORM}_${tool}"
+    if [[ -n "${!package_ref}" ]]; then
+      tool="${!package_ref}"
+    fi
+    tools_packages+=("$tool")
+  done
+
+  TOOLS_PACKAGES=("${tools_packages[@]}")
+}

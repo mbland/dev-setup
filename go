@@ -5,7 +5,7 @@
 . "${0%/*}/settings.bash"
 
 if [[ "$#" -eq 0 ]]; then
-  @go.setup_project install "$APPS_ROOT"
+  @go.setup_project install
 else
   @go "$@"
 fi

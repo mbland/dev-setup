@@ -2,25 +2,13 @@
 #
 # Install tool packages
 
-declare __TOOLS=('git' 'vim' 'tmux' 'jq' 'mercurial')
-declare __ADD_IF_MISSING=(
-  'curl'
-  'gcc'
-  'clang'
-  'less'
-  'make'
-  'ncurses'
-  'file'
-  'perl'
-  'openssl'
-  'bison'
-  'sqlite'
-  'bzip2'
-)
-declare __BUILD_SUPPORT=()
-declare -r __BREW_INSTALL_URL='https://raw.githubusercontent.com/Homebrew/install/master/install'
-
-declare __OS_PACKAGE_INSTALL_COMMAND=()
+_run_command() {
+  if [[ -n "$USE_SUDO" ]]; then
+    sudo "$@"
+  else
+    "$@"
+  fi
+}
 
 _update_os_and_setup_package_install_command() {
   # OS X/macOS
@@ -40,15 +28,18 @@ _update_os_and_setup_package_install_command() {
       fi
     fi
   elif command -v 'sudo' >/dev/null; then
-    __OS_PACKAGE_INSTALL_COMMAND+=('sudo')
+    USE_SUDO='true'
   fi
 
   # Ubuntu/Debian/Windows Subsystem for Linux
   if command -v 'apt-get' >/dev/null; then
-    __OS_PACKAGE_INSTALL_COMMAND+=('apt-get' 'install')
-    add-apt-repository ppa:git-core/ppa
-    apt-get update
-    apt-get upgrade
+    __OS_PACKAGE_INSTALL_COMMAND+=('apt-get' 'install' '-y')
+    export DEBIAN_FRONTEND='noninteractive'
+    _run_command apt-get update
+    _run_command apt-get install -y software-properties-common
+    _run_command add-apt-repository -y ppa:git-core/ppa
+    _run_command apt-get update
+    _run_command apt-get upgrade -y
     __BUILD_SUPPORT+=('build-essential'
       'linux-headers'
       'libbz2-1.0'
@@ -70,29 +61,29 @@ _update_os_and_setup_package_install_command() {
   # Arch Linux/MSYS2 (Windows)
   elif command -v 'pacman' >/dev/null; then
     __OS_PACKAGE_INSTALL_COMMAND+=('pacman' '-Syuu')
-    "${__OS_PACKAGE_INSTALL_COMMAND[@]}"
+    _run_command "${__OS_PACKAGE_INSTALL_COMMAND[@]}"
     __BUILD_SUPPORT+=('readline' 'xz')
 
   # FreeBSD
   elif command -v 'pkg' >/dev/null; then
     __OS_PACKAGE_INSTALL_COMMAND+=('pkg' 'install')
-    pkg upgrade -v
+    _run_command pkg upgrade -v
     __BUILD_SUPPORT+=('readline' 'xz')
 
   # Alpine Linux
   elif command -v 'apk' >/dev/null; then
     __OS_PACKAGE_INSTALL_COMMAND+=('apk' 'add')
-    apk update -v
-    apk upgrade -v
+    _run_command apk update -v
+    _run_command apk upgrade -v
     __BUILD_SUPPORT+=('ca-certificates' 'libc-dev' 'linux-headers' 'readline'
       'xz')
 
   # OS X/macOS
   elif command -v 'brew' >/dev/null; then
-    brew update
-    brew upgrade
-    brew cleanup --force -s
-    brew cask install tcl
+    _run_command brew update
+    _run_command brew upgrade
+    _run_command brew cleanup --force -s
+    _run_command brew cask install tcl
     __OS_PACKAGE_INSTALL_COMMAND+=('brew' 'install')
     __BUILD_SUPPORT+=('libyaml'
       'libzip' 'pcre' 'reattach-to-user-namespace' 'xz')
@@ -110,7 +101,8 @@ _tools() {
     fi
   done
 
-  "${__OS_PACKAGE_INSTALL_COMMAND[@]}" "${__TOOLS[@]}" "${__BUILD_SUPPORT[@]}"
+  _run_command "${__OS_PACKAGE_INSTALL_COMMAND[@]}" \
+    "${__TOOLS[@]}" "${__BUILD_SUPPORT[@]}"
 }
 
 _tools

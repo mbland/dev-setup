@@ -1,5 +1,37 @@
+# Root directory for language manager installs.
 declare -r APPS_ROOT='/usr/local/mbland'
-declare -r PATCHES_ROOT="$APPS_ROOT/patches"
+
+# List of language for which to install language managers.
+declare -r INSTALL_LANGUAGES=('go')
+
+# These are the tools that should get installed regardless of whether they're
+# already included in the OS.
+declare -r TOOLS=(
+  'git'
+  'jq'
+  'mercurial'
+  'tmux'
+  'vim'
+)
+
+# These are the tools that should get installed only if not included in the OS
+# already.
+declare -r TOOLS_ADD_IF_MISSING=(
+  'bison'
+  'bzip2'
+  'clang'
+  'curl'
+  'file'
+  'gcc'
+  'less'
+  'make'
+  'man'
+  'openssl'
+  'perl'
+  'tput'     # Test for for ncurses tools
+  'sqlite3'
+  'xz'
+)
 
 declare -r VIM_SCRIPTS=(
   'scripts/closetag.vim|http://www.vim.org/scripts/download_script.php?src_id=4318'
@@ -11,8 +43,6 @@ declare -r VIM_PATHOGEN_BUNDLE_REPOS=(
   'shime/vim-livedown'
   'editorconfig/editorconfig-vim'
 )
-
-declare -r INSTALL_LANGUAGES=('go')
 
 # Since these may collide with variables from the language managers, they're not
 # readonly.

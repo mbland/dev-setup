@@ -1,0 +1,65 @@
+#! /bin/bash
+#
+# Installes packages on Debian-based systems (including Ubuntu)
+
+declare -r ADDED_APT_REPOSITORIES=('ppa:git-core/ppa')
+declare -r DEBIAN_BASE_PACKAGES=(
+  'build-essential'
+  'linux-headers-generic'
+  'libbz2-1.0'
+  'libbz2-dev'
+  'libcurl4-openssl-dev'
+  'libffi-dev'
+  'libpcre3-dev'
+  'libreadline-dev'
+  'libsqlite3-dev'
+  'libssl-dev'
+  'libxml2-dev'
+  'libxslt1-dev'
+  'libyaml-dev'
+  'libzip-dev'
+  'zlib1g-dev'
+)
+
+declare -r debian_man='man-db'
+declare -r debian_tput='ncurses-bin'
+declare -r debian_xz='xz-utils'
+
+_set_up_debian_repositories() {
+  local apt_repo
+  local apt_repo_pattern
+
+  if ! command -v 'add-apt-repository' >/dev/null; then
+    run_setup_command apt-get update
+    run_setup_command "${PLATFORM_INSTALL_CMD[@]}" software-properties-common
+  fi
+
+  for apt_repo in "${ADDED_APT_REPOSITORIES}"; do
+    if [[ "$apt_repo" =~ ^ppa: ]]; then
+      apt_repo_pattern="deb http://ppa.launchpad.net/${apt_repo#*:}/"
+    else
+      apt_repo_pattern="$apt_repo"
+    fi
+    if ! grep "$apt_repo_pattern" -q /etc/apt/sources.list{,.d/*}; then
+      run_setup_command add-apt-repository -y "$apt_repo"
+    fi
+  done
+}
+
+_set_up_debian() {
+  export PLATFORM_INSTALL_CMD=('apt-get' 'install' '-y')
+  export DEBIAN_FRONTEND='noninteractive'
+
+  . "$_GO_USE_MODULES" 'platform'
+
+  _set_up_debian_repositories
+  run_setup_command apt-get update
+  run_setup_command apt-get upgrade -y
+
+  local TOOLS_PACKAGES=()
+  setup_tools_packages
+  run_setup_command "${PLATFORM_INSTALL_CMD[@]}" "${DEBIAN_BASE_PACKAGES[@]}" \
+    "${TOOLS_PACKAGES[@]}"
+}
+
+_set_up_debian
