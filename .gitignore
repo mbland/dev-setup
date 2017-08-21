@@ -1,0 +1,3 @@
+# Are your editor's temp files, OS metadata files, etc. showing up in `git
+# status`? Try adding them to `$HOME/.config/git/ignore` instead.
+scripts/go-script-bash
