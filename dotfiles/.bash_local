@@ -1,0 +1,10 @@
+#! /usr/bin/env bash
+
+PROJECTS=(
+  'mike-bland.com blog'
+  'mbland/go-script-bash gos'
+  'mbland/dev-setup devs'
+  'mbland/slack-github-issues sgi'
+  'mbland/certbot-webroot-setup cws'
+  'mbland/custom-links cl'
+)

@@ -4,7 +4,6 @@
 
 declare -r __INSTALL_SCRIPTS=('tools'
   'languages'
-  'dotfiles'
   'vim-packages'
   'npm')
 

@@ -1,35 +1,40 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
-# Install dotfiles for a new user account
+# Installs dotfiles in the user's `HOME` directory
 
-declare _DOTFILES=()
+. "$_GO_USE_MODULES" 'copy'
 
-if shopt -s globstar 2>/dev/null; then
-  GLOBIGNORE=".git*:.*.swp:.DS_Store:*/**/.*.swp:*/**/.DS_Store"
-  shopt -u globstar
-else
-  GLOBIGNORE=".git*:*.*.swp:*.DS_Store"
-fi
+_dotfiles_add_source_bash_dev() {
+  local candidates=(
+    '.bash_profile'
+    '.bash_login'
+    '.profile'
+    '.bashrc'
+  )
+  local source_bash_dev='. "$HOME/.bash_dev"'
+  local bash_startup
 
-_find_dotfiles() {
-  local _dotfile
-  for _dotfile in "$@"; do
-    if [[ ! -d "$_dotfile" ]]; then
-      _DOTFILES+=("$_dotfile")
-    else
-      _find_dotfiles $_dotfile/*
+  for bash_startup in "${candidates[@]}"; do
+    bash_startup="$HOME/$bash_startup"
+    if [[ -f "$bash_startup" ]]; then
+      break
     fi
   done
+
+  if ! grep -q "$source_bash_dev" "$bash_startup"; then
+    printf '%s\n' "$source_bash_dev" >>"$bash_startup"
+  fi
 }
 
 _dotfiles() {
   local dotfile
 
-  _find_dotfiles .*
+  @go.log INFO Copying dotfiles into "$HOME"
 
-  for dotfile in "${_DOTFILES[@]}"; do
-    echo "Installing: $dotfile"
-  done
+  while IFS= read -r dotfile; do
+    copy_file_safely "$dotfile" 'dotfiles/' "$HOME"
+  done < <(find dotfiles -type f)
+  _dotfiles_add_source_bash_dev
 }
 
-_dotfiles
+_dotfiles "$@"
