@@ -11,8 +11,18 @@ declare -r VIM_PATHOGEN_BUNDLE_REPOS=(
   'editorconfig/editorconfig-vim'
 )
 
-declare -r GO_VERSION='go1.6'
-declare -r GVM_VERSION='25ea8ae158e2861c92e2b22c458e60840157832f'
+NPMS=(
+  'livedown'
+  'node-inspector'
+  'yo'
+)
+
+# Since these may collide with variables from the language managers, they're not
+# readonly.
+# TODO(mbland): Restore GVM_VERSION if/when patch support is merged into
+# moovweb/gvm.
+declare GO_VERSION='go1.7.4'
+declare GVM_VERSION='patches' # 'f38923cc7b3108747b67ff8d0d633569b36cf99b'
 
 declare -r NODE_VERSION='5.7.1'
 
