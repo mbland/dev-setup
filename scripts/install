@@ -3,6 +3,7 @@
 # Set up the development environment for a new user account
 
 declare -r __INSTALL_SCRIPTS=('packages'
+  'user-bin'
   'languages'
   'vim-packages'
   'npm')

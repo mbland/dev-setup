@@ -1,0 +1,37 @@
+#! /bin/bash
+#
+# Disables Spotlight indexing and other OS X metadata for a USB device.
+#
+# Author: Mike Bland <mbland@acm.org>
+# Date:   2011-07-30
+
+REFERENCE=http://hostilefork.com/2009/12/02/trashes-fseventsd-and-spotlight-v100/
+
+if [ ! -d .Trashes ]; then
+  echo ".Trashes dir not found"
+  exit 1
+fi
+
+if [ ! -d .fseventsd ]; then
+  echo ".fseventsd dir not found"
+  exit 1
+fi
+
+set -x
+
+chmod 700 .Trashes
+
+cat > .metadata_never_index <<EOF
+$REFERENCE
+EOF
+
+rm -rf .Trashes .Spotlight* ._.Trashes
+cat > .Trashes <<EOF
+$REFERENCE
+EOF
+
+cat > .fseventsd/no_log <<EOF
+$REFERENCE
+EOF
+
+rm -rf .fseventsd/fseventsd-uuid

@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+
+sudo vmhgfs-fuse -o allow_other -o uid=1000 -o gid=1000 -o auto_unmount .host:/shared /mnt/shared
