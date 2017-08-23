@@ -1,5 +1,0 @@
-#! /bin/bash
-#
-# List all of the dotfiles from {{root}}
-
-echo "${_DOTFILES[*]}"

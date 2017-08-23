@@ -1,20 +1,32 @@
+#! /usr/bin/env bash
 umask 022
+
+APPS_HOME="/usr/local/mbland"
+
+for script in "$APPS_HOME"/etc/profile.d/*; do
+  . "$script"
+done
 
 PS1="\[\033[01;32m\]\u@\h \[\033[00m\]\[\033[01;34m\]\w\$\[\033[00m\] "
 CLICOLOR=true
 PAGER=less
 EDITOR=vim
 LESS="-Rsi"
-PATH=$HOME/bin:/usr/local/mbland/bin:/usr/local/bin:$PATH
-MANPATH=/usr/local/mbland/share/man:/usr/local/share/man:$MANPATH
-export PS1 CLICOLOR PAGER EDITOR LESS PATH MANPATH
+PATH="${HOME}/bin:${APPS_HOME}/bin:${PATH}"
+MANPATH="${APPS_HOME}/share/man:/usr/local/share/man:${MANPATH}"
+export PS1 CLICOLOR PAGER EDITOR LESS APPS_HOME PATH MANPATH
 
 alias ls="ls -FA"
 alias pcpu='ps -eo pid,uid,pcpu,command | sort -rk 3'
 alias hostkey='ssh-keygen -l -f /etc/ssh_host_rsa_key'
 
-# Creates a branch-specific git working directory in the same directory as the
-# original repository.
+if [[ "$OSTYPE" == 'darwin' && -f "$HOME/.ssh/id_rsa" ]]; then
+  ssh-add -K "$HOME/.ssh/id_rsa" &>/dev/null
+  ssh-add -A &>/dev/null
+fi
+
+# Creates a branch-specific git working directory in the same parent directory
+# as the original repository.
 git-new-workdir() {
   if test $# -ne 2; then
     echo "Usage: $FUNCNAME <git repo> <branch name>"
@@ -48,16 +60,24 @@ git-changelog() {
     "${last_release_tag}..${current_release_tag}^"
 }
 
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+create_project_functions() {
+  local project_root="$1"
+  shift
+  local project
+  local repo
+  local cmd
 
-if [[ -x "$HOME/src/mbland/dotfiles/go" ]]; then
-  eval "$("$HOME/src/mbland/dotfiles/go" env dots)"
+  for project in "$@"; do
+    read repo cmd <<<"$project"
+    go_script="$project_root/$repo/go"
+    if [[ -x "$go_script" ]]; then
+      eval "$("$go_script" env "$cmd")"
+    fi
+  done
+}
+
+if [[ -r "$HOME/.bash_local" ]]; then
+  . "$HOME/.bash_local"
 fi
 
-if [[ -x "$HOME/src/mike-bland.com/go" ]]; then
-  eval "$("$HOME/src/mike-bland.com/go" env blog)"
-fi
-
-if [[ -r "$HOME/.bash_profile_local" ]]; then
-  . "$HOME/.bash_profile_local"
-fi
+create_project_functions "$HOME/src" "${PROJECTS[@]}"

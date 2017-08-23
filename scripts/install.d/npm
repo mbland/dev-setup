@@ -2,10 +2,8 @@
 #
 # Install global npm modules
 
-NPMS=(
-  'livedown'
-  'node-inspector'
-  'yo'
-)
+install_npm_packages() {
+  npm install -g "${NPMS[@]}"
+}
 
-npm install -g "${NPMS[@]}"
+install_npm_packages "$@"

@@ -1,0 +1,55 @@
+#! /usr/bin/env bash
+#
+# Install packages on Ubuntu Linux
+
+export PACKAGE_INSTALL_COMMAND=('sudo' 'apt-get' 'install' '-y')
+export PLATFORM_PACKAGES=(
+  'build-essential'
+  'linux-headers'
+  'libbz2-1.0'
+  'libbz2-dev'
+  'libcurl4-openssl-dev'
+  'libffi-dev'
+  'libpcre3-dev'
+  'libreadline-dev'
+  'libsqlite3-dev'
+  'libssl-dev'
+  'libxml2-dev'
+  'libxslt1-dev'
+  'libyaml-dev'
+  'libzip-dev'
+  'libzip2'
+  'zlib1g-dev'
+  'xz-utils'
+)
+export DEBIAN_FRONTEND='noninteractive'
+export APT_REPOSITORIES=(
+  'ppa:git-core/ppa'
+  'ppa:nginx/stable'
+)
+
+# Supposedly the following `wget` + `apt install` command will install the
+# Google Chrome apt repo and signing key. Otherwise, the following would be
+# the first step:
+#wget -q -O - https://dl.google.com/linux/linux_signing_key.pub |
+#  sudo apt-key add -
+ubuntu_install_google_chrome() {
+  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo apt install google-chrome-stable_current_amd64.deb
+  rm google-chrome-stable_current_amd64.deb
+}
+
+platform_pre_install() {
+  local apt_repo
+
+  sudo apt-get update
+  sudo apt-get install -y software-properties-common
+
+  for apt_repo in "${APT_REPOSITORIES[@]}"; do
+    sudo add-apt-repository -y "$apt_repo"
+  done
+
+  ubuntu_install_google_chrome
+  sudo apt-get update
+  sudo apt-get upgrade -y
+}

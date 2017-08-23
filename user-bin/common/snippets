@@ -1,0 +1,79 @@
+#! /usr/bin/env bash
+#
+# Opens EDITOR to create/edit today's snippets
+#
+# SNIPPETS_HOME must be set, and will be created if it doesn't exist.
+#
+# Author: Mike Bland <mbland@acm.org>
+# Date:   2016-05-10
+
+declare YEAR
+declare MONTH
+declare DAY
+declare DATE
+declare QUARTER=0
+declare QUARTER_DIR
+declare CURRENT
+
+if [[ -z "$SNIPPETS_HOME" ]]; then
+  printf 'Please set SNIPPETS_HOME before using this script.\n' >&2
+  exit 1
+fi
+
+if [[ ! -d "$SNIPPETS_HOME" ]]; then
+  if ! mkdir -p "$SNIPPETS_HOME"; then
+    printf 'Failed to create SNIPPETS_HOME dir: %s\n' "$SNIPPETS_HOME" >&2
+    exit 1
+  fi
+fi
+
+if ! printf -v 'DATE' '%(%Y %m %d)T'; then
+  DATE="$(/bin/date "+%Y %m %d")"
+fi
+
+if [[ "$?" != '0' ]] || ! read YEAR MONTH DAY <<<"$DATE"; then
+  printf 'Failed to determine date; exiting.\n' >&2
+  exit 1
+fi
+
+case "$MONTH" in
+01|02|03)
+  QUARTER=1
+  ;;
+04|05|06)
+  QUARTER=2
+  ;;
+07|08|09)
+  QUARTER=3
+  ;;
+10|11|12)
+  QUARTER=4
+  ;;
+*)
+  echo "Something wrong with date: MONTH == $MONTH"
+  exit 1
+  ;;
+esac
+
+QUARTER_DIR="$SNIPPETS_HOME/${YEAR}q${QUARTER}"
+
+if [[ ! -d "$QUARTER_DIR" ]] && ! mkdir -m 700 "$QUARTER_DIR"{,/dailies}; then
+  printf 'Failed to create %s; exiting.\n' "$QUARTER_DIR" >&2
+  exit 1
+fi
+
+CURRENT="$SNIPPETS_HOME/current"
+
+if [[ -L "$CURRENT" ]]; then
+  if ! cd "$CURRENT"; then
+    printf "Can't cd into %s; exiting.\n" "$CURRENT" >&2
+  elif [[ "$(pwd -P)" != "$QUARTER_DIR" ]]; then
+    rm -f "$CURRENT"
+  fi
+fi
+
+if [[ ! -L "$CURRENT" ]]; then
+  /bin/ln -s "$QUARTER_DIR" "$SNIPPETS_HOME/current"
+fi
+
+cd "$CURRENT/dailies" && "$EDITOR" "${YEAR}${MONTH}${DAY}.txt"

@@ -1,0 +1,50 @@
+#! /usr/bin/env bash
+#
+# Short description of the copy module
+#
+# Exports:
+#   copy_file_safely
+#     Copy a file, creating directories if need be, only if it doesn't exist
+
+# Copy a file, creating directories if need be, only if it doesn't exist
+#
+# Arguments:
+#   src:         Path to the file to copy
+#   src_prefix:  Prefix to trim from the src file when computing destination dir
+#   dest_dir:    Destination directory for the copied file
+#   dir_perms:   Permissions to set for created directories
+#   file_perms:  Permissions to set for copied files
+copy_file_safely() {
+  local src="$1"
+  local src_prefix="$2"
+  local dest_dir="$3"
+  local dir_perms="${4:-700}"
+  local file_perms="${5:-600}"
+  local dest="$dest_dir/${src#$src_prefix}"
+  local dest_parent="${dest_dir%/*}"
+
+  dest_dir="${dest%/*}"
+  printf '%s => %s\n' "$src" "$dest"
+
+  if [[ ! -d "$dest_dir" ]]; then
+    if ! mkdir -p "$dest_dir"; then
+      @go.log FATAL Failed to create "$dest_dir"
+    fi
+    while [[ "$dest_dir" != "$dest_parent" ]]; do
+      if ! chmod "$dir_perms" "$dest_dir"; then
+        @go.log FATAL Failed to set permissions on "$dest_dir"
+      fi
+      dest_dir="${dest_dir%/*}"
+    done
+  fi
+
+  if [[ ! -f "$dest" ]]; then
+    if ! cp "$src" "$dest"; then
+      @go.log FATAL Failed to copy "$src" to "$dest"
+    elif ! chmod "$file_perms" "$dest"; then
+      @go.log FATAL Failed to set permissions on "$dest"
+    fi
+  elif ! diff "$src" "$dest" >/dev/null; then
+    @go.log WARN "$dest" exists and differs from "$src"
+  fi
+}

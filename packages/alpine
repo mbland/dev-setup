@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+#
+# Install packages on Alpine Linux
+
+export PACKAGE_INSTALL_COMMAND=('sudo' 'apk' 'add')
+export PLATFORM_PACKAGES=(
+  'ca-certificates'
+  'libc-dev'
+  'linux-headers'
+  'nodejs'
+  'readline'
+)
+
+platform_pre_install() {
+  sudo apk update -v
+  sudo apk upgrade -v
+}
+
+platform_vm_install() {
+  sudo apk add open-vm-tools
+  sudo rc-update add open-vm-tools
+}

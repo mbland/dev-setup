@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+#
+# Install scripts in the user's `HOME/bin` directory
+#
+# These may be common or platform-specific scripts.
+
+. "$_GO_USE_MODULES" 'platform' 'copy'
+
+install_user_bin_scripts() {
+  local script
+
+  @go.log INFO Copying user-bin scripts into "$HOME/bin"
+
+  for script in user-bin/{common,$PLATFORM_ID}/*; do
+    if [[ -f "$script" ]]; then
+      copy_file_safely "$script" "${script%/*}/" "$HOME/bin" '700' '700'
+    fi
+  done
+}
+
+install_user_bin_scripts "$@"

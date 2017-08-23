@@ -1,0 +1,9 @@
+# This is Git's per-user configuration file.
+[user]
+	name = Mike Bland
+	email = mbland@acm.org
+	signingkey = 5121C73A6E07384B
+[push]
+	default = simple
+[commit]
+	gpgsign = true
