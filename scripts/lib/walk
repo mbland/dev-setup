@@ -3,16 +3,16 @@
 # Functions for processing lists of dev setup files
 #
 # Exports:
-#   process_files
+#   walk_files
 #     Perform an operation on each path that is a regular file
 #
-#   process_dotfiles
+#   walk_dotfiles
 #     Perform an operation on each dotfile path
 #
-#   process_user_bin_scripts
+#   walk_user_bin_scripts
 #     Perform an operation on all user-bin script paths
 #
-#   process_path_forward
+#   walk_path_forward
 #     Processes a file path from the first component to the last
 #
 #   create_dir_with_permissions
@@ -28,13 +28,13 @@
 # Arguments:
 #   operation:  Name of the function taking a file path as an argument
 #   ${@:1}:     List of paths to begin examining
-process_files() {
+walk_files() {
   local f
   for f in "${@:1}"; do
     if [[ -f "$f" ]] && ! "$1" "$f"; then
       return
     elif [[ -d "$f" ]]; then
-      process_files "$1" "$f"/*
+      walk_files "$1" "$f"/*
     fi
   done
 }
@@ -43,19 +43,19 @@ process_files() {
 #
 # Arguments:
 #   operation:  Function taking a dotfile path as an argument
-process_dotfiles() {
-  process_files "$1" dotfiles/.[A-Za-z0-9_-]*
+walk_dotfiles() {
+  walk_files "$1" dotfiles/.[A-Za-z0-9_-]*
 }
 
 # Perform an operation on all user-bin script paths
 #
 # Arguments:
 #   operation:  Function taking a user-bin script path as an argument
-process_user_bin_scripts() {
+walk_user_bin_scripts() {
   if [[ -z "$PLATFORM_ID" ]]; then
     . "$_GO_USE_MODULES" 'platform'
   fi
-  process_files "$1" user-bin/{common,$PLATFORM_ID}/*
+  walk_files "$1" user-bin/{common,$PLATFORM_ID}/*
 }
 
 # Processes a file path from the first component to the last
@@ -68,7 +68,7 @@ process_user_bin_scripts() {
 # Arguments:
 #   operation:  Name of the function taking a file path as an argument
 #   ${@:1}:     List of paths to begin examining
-process_path_forward() {
+walk_path_forward() {
   local operation="$1"
   local oldIFS="$IFS"
   local IFS='/'
@@ -125,5 +125,5 @@ create_dir_with_permissions() {
 #   dir:          The path of the directory to create
 #   permissions:  The permissions to set on any created directory
 create_dirs_with_permissions() {
-  permissions="$2" process_path_forward create_dir_with_permissions "$1"
+  permissions="$2" walk_path_forward create_dir_with_permissions "$1"
 }

@@ -4,7 +4,7 @@
 #
 # These may be common or platform-specific scripts.
 
-. "$_GO_USE_MODULES" 'platform' 'copy'
+. "$_GO_USE_MODULES" 'platform' 'copy' 'walk'
 
 install_user_bin_scripts_do_copy() {
   copy_file_safely "$1" "${1%/*}/" "$HOME/bin" '700' '700'
@@ -14,8 +14,7 @@ install_user_bin_scripts() {
   local script
 
   @go.log INFO Copying user-bin scripts into "$HOME/bin"
-  . "$_GO_USE_MODULES" 'process-files'
-  process_user_bin_scripts install_user_bin_scripts_do_copy
+  walk_user_bin_scripts install_user_bin_scripts_do_copy
 }
 
 install_user_bin_scripts "$@"

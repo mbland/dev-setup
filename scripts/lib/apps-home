@@ -6,7 +6,7 @@
 #   create_apps_home
 #     Creates the APPS_HOME directory structure
 
-. "$_GO_USE_MODULES" 'log' 'process-files'
+. "$_GO_USE_MODULES" 'log' 'walk'
 
 export APPS_HOME_DIRS=(
   "$APPS_HOME/etc/profile.d"

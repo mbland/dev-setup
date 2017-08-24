@@ -6,6 +6,8 @@
 #   copy_file_safely
 #     Copy a file, creating directories if need be, only if it doesn't exist
 
+. "$_GO_USE_MODULES" 'walk'
+
 # Copy a file, creating directories if need be, only if it doesn't exist
 #
 # Arguments:
@@ -23,20 +25,8 @@ copy_file_safely() {
   local dest="$dest_dir/${src#$src_prefix}"
   local dest_parent="${dest_dir%/*}"
 
-  dest_dir="${dest%/*}"
   printf '%s => %s\n' "$src" "$dest"
-
-  if [[ ! -d "$dest_dir" ]]; then
-    if ! mkdir -p "$dest_dir"; then
-      @go.log FATAL Failed to create "$dest_dir"
-    fi
-    while [[ "$dest_dir" != "$dest_parent" ]]; do
-      if ! chmod "$dir_perms" "$dest_dir"; then
-        @go.log FATAL Failed to set permissions on "$dest_dir"
-      fi
-      dest_dir="${dest_dir%/*}"
-    done
-  fi
+  create_dirs_with_permissions "$dest_dir" "$dir_perms"
 
   if [[ ! -f "$dest" ]]; then
     if ! cp "$src" "$dest"; then

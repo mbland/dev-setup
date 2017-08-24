@@ -2,7 +2,7 @@
 #
 # Installs dotfiles in the user's `HOME` directory
 
-. "$_GO_USE_MODULES" 'copy'
+. "$_GO_USE_MODULES" 'copy' 'walk'
 
 _dotfiles_add_source_bash_dev() {
   local candidates=(
@@ -35,8 +35,7 @@ _dotfiles() {
   local dotfile
 
   @go.log INFO Copying dotfiles into "$HOME"
-  . "$_GO_USE_MODULES" 'process-files'
-  process_dotfiles _dotfiles_copy_to_user_home_dir
+  walk_dotfiles _dotfiles_copy_to_user_home_dir
   _dotfiles_add_source_bash_dev
 }
 

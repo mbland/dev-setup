@@ -6,7 +6,7 @@
 
 export DIFF_EDITOR="${DIFF_EDITOR:-vimdiff}"
 
-. "$_GO_USE_MODULES" 'log' 'process-files'
+. "$_GO_USE_MODULES" 'log' 'walk'
 
 _diff_edit_if_different() {
   if [[ ! -f "$1" ]]; then
@@ -26,8 +26,8 @@ _diff_user_bin_script() {
 }
 
 _diff() {
-  process_dotfiles _diff_dotfile
-  process_user_bin_scripts _diff_user_bin_script
+  walk_dotfiles _diff_dotfile
+  walk_user_bin_scripts _diff_user_bin_script
 }
 
 _diff "$@"
