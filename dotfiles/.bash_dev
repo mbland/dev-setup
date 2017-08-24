@@ -4,7 +4,9 @@ umask 022
 APPS_HOME="/usr/local/mbland"
 
 for script in "$APPS_HOME"/etc/profile.d/*; do
-  . "$script"
+  if [[ -f "$script" ]]; then
+    . "$script"
+  fi
 done
 
 PS1="\[\033[01;32m\]\u@\h \[\033[00m\]\[\033[01;34m\]\w\$\[\033[00m\] "
