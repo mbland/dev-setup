@@ -1,0 +1,33 @@
+#! /usr/bin/env bash
+#
+# Opens vimdiff on files that differ
+#
+# The installed file will be on the left, and the repo file on the right.
+
+export DIFF_EDITOR="${DIFF_EDITOR:-vimdiff}"
+
+. "$_GO_USE_MODULES" 'log' 'process-files'
+
+_diff_edit_if_different() {
+  if [[ ! -f "$1" ]]; then
+    @go.log WARN "$1" does not exist
+  elif ! diff "$1" "$2" >/dev/null; then
+    @go.log INFO Diffing "$1" against "$2"
+    "$DIFF_EDITOR" "$1" "$2"
+  fi
+}
+
+_diff_dotfile() {
+  _diff_edit_if_different "$HOME/${1#dotfiles/}" "$1"
+}
+
+_diff_user_bin_script() {
+  _diff_edit_if_different "$HOME/bin/${1#user-bin/*/}" "$1"
+}
+
+_diff() {
+  process_dotfiles _diff_dotfile
+  process_user_bin_scripts _diff_user_bin_script
+}
+
+_diff "$@"
