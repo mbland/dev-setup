@@ -14,23 +14,10 @@
 #   RUBY_VERSION:    Version of Ruby to install
 #   RBENV_VERSION:   Tag or commit hash of rbenv version to install
 
+. "$_GO_USE_MODULES" 'apps-home'
+
 _languages() {
-  local app_sys_root="$1"
-  local language
-
-  if [ ! -d $app_sys_root ]; then
-    mkdir -p $app_sys_root
-  fi
-
-  if [ ! -d /etc/profile.d ]; then
-    mkdir /etc/profile.d
-    cat >>/etc/profile <<'END_PROFILE'
-for script in /etc/profile.d/*.sh
-do
-  . $script
-done
-END_PROFILE
-  fi
+  create_apps_home
 
   @go install languages "go" "$GO_VERSION" "$GVM_VERSION"
   @go install languages "node" "$NODEJS_VERSION" "$NVM_VERSION"

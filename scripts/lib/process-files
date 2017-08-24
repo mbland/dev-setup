@@ -11,6 +11,15 @@
 #
 #   process_user_bin_scripts
 #     Perform an operation on all user-bin script paths
+#
+#   process_path_forward
+#     Processes a file path from the first component to the last
+#
+#   create_dir_with_permissions
+#     Creates a directory with the specified permissions
+#
+#   create_dirs_with_permissions
+#     Creates a directory and its parents with the specified permissions
 
 # Perform an operation on each path that is a regular file
 #
@@ -47,4 +56,74 @@ process_user_bin_scripts() {
     . "$_GO_USE_MODULES" 'platform'
   fi
   process_files "$1" user-bin/{common,$PLATFORM_ID}/*
+}
+
+# Processes a file path from the first component to the last
+#
+# The first call to `operation` receives the first component of the path as its
+# path argument. Each successive call to `operation` receives the previous path
+# plus its child component. The processing is terminated when `operation`
+# returns a nonzero value.
+#
+# Arguments:
+#   operation:  Name of the function taking a file path as an argument
+#   ${@:1}:     List of paths to begin examining
+process_path_forward() {
+  local operation="$1"
+  local oldIFS="$IFS"
+  local IFS='/'
+  local components=($2)
+  local component
+  local current_path
+
+  IFS="$oldIFS"
+
+  for component in "${components[@]}"; do
+    current_path+="$component/"
+    if ! "$operation" "$current_path"; then
+      break
+    fi
+  done
+}
+
+# Creates a directory with the specified permissions
+#
+# If a directory already exists, this function does not update its permissions.
+#
+# Globals:
+#   permissions:  May be defined as an alternative to passing as a parameter
+#
+# Arguments:
+#   dir:          The path of the directory to create
+#   permissions:  The permissions to set on the directory, if created
+create_dir_with_permissions() {
+  local dir="$1"
+  local permissions="${2:-$permissions}"
+
+  if [[ -z "$dir" ]]; then
+    @go.log FATAL "Directory argument not specified"
+  elif [[ -z "$permissions" ]]; then
+    @go.log FATAL "Permissions not specified"
+  fi
+
+  if [[ ! -d "$dir" ]]; then
+    @go.log INFO "Creating $dir"
+
+    if ! mkdir "$dir"; then
+      @go.log FATAL "Could not create $dir"
+    elif ! chmod "$permissions" "$dir"; then
+      @go.log FATAL "Could not set permissions for $dir"
+    fi
+  fi
+}
+
+# Creates a directory and its parents with the specified permissions
+#
+# If a directory already exists, this function does not update its permissions.
+#
+# Arguments:
+#   dir:          The path of the directory to create
+#   permissions:  The permissions to set on any created directory
+create_dirs_with_permissions() {
+  permissions="$2" process_path_forward create_dir_with_permissions "$1"
 }

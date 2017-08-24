@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+#
+# Utilities to manage the APPS_HOME directory structure
+#
+# Exports:
+#   create_apps_home
+#     Creates the APPS_HOME directory structure
+
+. "$_GO_USE_MODULES" 'log' 'process-files'
+
+export APPS_HOME_DIRS=(
+  "$APPS_HOME/etc/profile.d"
+)
+export APPS_HOME_DIR_PERMISSIONS="${APPS_HOME_DIR_PERMISSIONS:-755}"
+export APPS_HOME_FILE_PERMISSIONS="${APPS_HOME_FILE_PERMISSIONS:-644}"
+
+if [[ -z "$APPS_HOME" ]]; then
+  @go.log FATAL "APPS_HOME not defined; set it in settings.bash"
+fi
+
+# Creates the APPS_HOME directory structure
+create_apps_home() {
+  local dir
+
+  for dir in "${APPS_HOME_DIRS[@]}"; do
+    create_dirs_with_permissions "$dir" "$APPS_HOME_DIR_PERMISSIONS"
+  done
+}
