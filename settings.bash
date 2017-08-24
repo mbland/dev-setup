@@ -1,5 +1,5 @@
 # Root directory for language manager installs.
-declare -r APPS_ROOT='/usr/local/mbland'
+declare -r APPS_HOME='/usr/local/mbland'
 
 # List of language for which to install language managers.
 declare -r INSTALL_LANGUAGES=('go')

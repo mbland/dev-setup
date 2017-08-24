@@ -11,7 +11,7 @@
 #
 # Will install gvm in `<app-sys-root>/gvm` and add `/etc/profile.d/gvm.sh`.
 
-declare -r _GVM_PROFILE='/etc/profile.d/gvm.sh'
+declare -r _GVM_PROFILE="$APPS_HOME/etc/profile.d/gvm.sh"
 declare -r _GVM_INSTALLER_URL='https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer'
 
 _install_gvm() {
