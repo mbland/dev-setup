@@ -6,16 +6,16 @@
 
 . "$_GO_USE_MODULES" 'platform' 'copy'
 
+install_user_bin_scripts_do_copy() {
+  copy_file_safely "$1" "${1%/*}/" "$HOME/bin" '700' '700'
+}
+
 install_user_bin_scripts() {
   local script
 
   @go.log INFO Copying user-bin scripts into "$HOME/bin"
-
-  for script in user-bin/{common,$PLATFORM_ID}/*; do
-    if [[ -f "$script" ]]; then
-      copy_file_safely "$script" "${script%/*}/" "$HOME/bin" '700' '700'
-    fi
-  done
+  . "$_GO_USE_MODULES" 'process-files'
+  process_user_bin_scripts install_user_bin_scripts_do_copy
 }
 
 install_user_bin_scripts "$@"

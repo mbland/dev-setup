@@ -26,14 +26,17 @@ _dotfiles_add_source_bash_dev() {
   fi
 }
 
+_dotfiles_copy_to_user_home_dir() {
+  copy_file_safely "$1" 'dotfiles/' "$HOME"
+}
+
 _dotfiles() {
+  local dotfiles
   local dotfile
 
   @go.log INFO Copying dotfiles into "$HOME"
-
-  while IFS= read -r dotfile; do
-    copy_file_safely "$dotfile" 'dotfiles/' "$HOME"
-  done < <(find dotfiles -type f)
+  . "$_GO_USE_MODULES" 'process-files'
+  process_dotfiles _dotfiles_copy_to_user_home_dir
   _dotfiles_add_source_bash_dev
 }
 
