@@ -14,14 +14,16 @@
 
 # Perform an operation on each path that is a regular file
 #
+# The recursion is terminated when `operation` returns a nonzero value.
+#
 # Arguments:
 #   operation:  Name of the function taking a file path as an argument
 #   ${@:1}:     List of paths to begin examining
 process_files() {
   local f
   for f in "${@:1}"; do
-    if [[ -f "$f" ]]; then
-      "$1" "$f"
+    if [[ -f "$f" ]] && ! "$1" "$f"; then
+      return
     elif [[ -d "$f" ]]; then
       process_files "$1" "$f"/*
     fi
