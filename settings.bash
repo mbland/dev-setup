@@ -23,6 +23,7 @@ declare -r PACKAGES_ADD_IF_MISSING=(
   'curl'
   'file'
   'gcc'
+  'gpg'
   'less'
   'make'
   'man'
@@ -46,19 +47,19 @@ declare -r VIM_PATHOGEN_BUNDLE_REPOS=(
 
 NPMS=(
   'livedown'
-  'node-inspector'
   'yo'
 )
+#  'node-inspector'
 
 # Since these may collide with variables from the language managers, they're not
 # readonly.
 # TODO(mbland): Restore GVM_VERSION if/when patch support is merged into
 # moovweb/gvm.
-declare GO_VERSION='go1.7.4'
-declare GVM_VERSION='patches' # 'f38923cc7b3108747b67ff8d0d633569b36cf99b'
+declare GO_VERSION='go1.9'
+#declare GVM_VERSION='patches' # 'f38923cc7b3108747b67ff8d0d633569b36cf99b'
 
-declare -r NODE_VERSION='5.7.1'
+declare -r NODE_VERSION='8.4.0'
 
-declare -r PYTHON_VERSION='3.5.1'
+declare -r PYTHON_VERSION='3.6.2'
 
-declare -r RUBY_VERSION='2.3.0'
+declare -r RUBY_VERSION='2.4.1'

@@ -2,9 +2,9 @@
 #
 # Install pyenv and the latest Python version
 
-declare -r _PYENV_ROOT="$APP_SYS_ROOT/pyenv"
-declare -r _PYENV_VERSION='v20160202'
-declare -r _PYENV_PROFILE='/etc/profile.d/pyenv.sh'
+declare -r _PYENV_ROOT="$APPS_HOME/pyenv"
+declare -r _PYENV_VERSION='v1.1.3'
+declare -r _PYENV_PROFILE="$APPS_HOME/etc/profile.d/pyenv.sh"
 
 _install_pyenv() {
   local orig_pwd="$PWD"
@@ -26,8 +26,8 @@ _install_pyenv() {
 _install_python() {
   _install_pyenv
   . "$_PYENV_PROFILE"
-  pyenv install $_PYTHON_VERSION
-  pyenv global $_PYTHON_VERSION
+  pyenv install $PYTHON_VERSION
+  pyenv global $PYTHON_VERSION
   pip install --upgrade pip
 }
 

@@ -11,6 +11,8 @@ export PLATFORM_PACKAGES=(
   'xz'
 )
 
+__BREW_INSTALL_URL="https://raw.githubusercontent.com/Homebrew/install/master/install"
+
 platform_pre_install() {
   if [[ ! -d '/Applications/Xcode.app' ]]; then
     echo "Please install Xcode and run this script again."

@@ -11,41 +11,70 @@
 #
 # Will install gvm in `<app-sys-root>/gvm` and add `/etc/profile.d/gvm.sh`.
 
+declare -r _GVM_ROOT="$APPS_HOME/gvm"
+declare -r _GVM_VERSION='34b56311e1e3add4b8f7ce3eeadd23f19c627328'
 declare -r _GVM_PROFILE="$APPS_HOME/etc/profile.d/gvm.sh"
 declare -r _GVM_INSTALLER_URL='https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer'
+declare -r _GVM_BOOTSTRAP_VERSION='release-branch.go1.4'
 
 _install_gvm() {
-  local app_sys_root="$1"
-  local gvm_dir="$app_sys_root/gvm"
-  local gvm_version="$2"
-
   if [[ -f "$_GVM_PROFILE" ]]; then
     return
   fi
 
   curl -L -O "$_GVM_INSTALLER_URL"
-  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$gvm_version" "$app_sys_root"
+  GVM_NO_UPDATE_PROFILE=true bash ./gvm-installer "$_GVM_VERSION" "$APPS_HOME"
   rm ./gvm-installer
-  echo ". '$gvm_dir/scripts/gvm'" >>"$_GVM_PROFILE"
+  echo ". '$_GVM_ROOT/scripts/gvm'" >>"$_GVM_PROFILE"
   chmod +x "$_GVM_PROFILE"
 }
 
-_install_go() {
-  local app_sys_root="$1"
-  local go_version="$2"
-  local gvm_version="$3"
+_prepare_go_repo_for_bootstrap() {
+  local repo_url='https://go.googlesource.com/go'
+  local repo_path="$_GVM_ROOT/archive/go"
+  local version="$_GVM_BOOTSTRAP_VERSION"
+  local orig_pwd="$PWD"
 
-  if [[ -z "$go_version" ]]; then
-    return
+  printf 'Preparing %s to build %s\n' "$repo_path" "$version"
+
+  if [[ ! -d "$repo_path" ]] && ! git clone "$repo_url" "$repo_path"; then
+    printf 'Failed to clone %s into %s\n' "$repo_url" "$repo_path" >&2
+    exit 1
+  elif ! cd "$repo_path" >/dev/null; then
+    printf 'Failed to change into repo directory %s\n' "$repo_path" >&2
+    exit 1
+  elif ! git fetch origin "$version"; then
+    printf 'Failed to fetch bootstrap branch %s\n' "$version" >&2
+    exit 1
+  elif ! git checkout "$version"; then
+    printf 'Failed to checkout bootstrap branch %s\n' "$version" >&2
+    exit 1
+  elif ! cd "$orig_pwd" >/dev/null; then
+    printf 'Failed to change directory back to %s\n' "$orig_pwd" >&2
+    exit 1
   fi
+}
 
-  _install_gvm "$app_sys_root" "$gvm_version"
+_install_go() {
+  _install_gvm
   . "$_GVM_PROFILE"
-  gvm install go1.4.3
-  gvm use go1.4.3
-  gvm install $go_version
-  gvm use $go_version --default
-  gvm uninstall go1.4.3
+
+  if [[ -f "$_GVM_ROOT/gos/$GO_VERSION/bin/go" ]]; then
+    printf 'Go version %s already installed\n' "$GO_VERSION"
+    return
+  elif ! _prepare_go_repo_for_bootstrap; then
+    return 1
+  elif ! gvm install "$_GVM_BOOTSTRAP_VERSION"; then
+    return 1
+  elif ! gvm use "$_GVM_BOOTSTRAP_VERSION"; then
+    return 1
+  elif ! GOROOT_BOOTSTRAP="$_GVM_ROOT/gos/$_GVM_BOOTSTRAP_VERSION" \
+    gvm install "$GO_VERSION"; then
+    return 1
+  elif ! gvm use "$GO_VERSION" --default; then
+    return 1
+  fi
+  gvm uninstall "$_GVM_BOOTSTRAP_VERSION"
 }
 
 _install_go "$@"
