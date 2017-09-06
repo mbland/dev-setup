@@ -2,9 +2,9 @@
 #
 # Install nvm and the latest Node.js version
 
-declare -r _NVM_ROOT="$APP_SYS_ROOT/nvm"
+declare -r _NVM_ROOT="$APPS_HOME/nvm"
 declare -r _NVM_VERSION='v0.31.0'
-declare -r _NVM_PROFILE='/etc/profile.d/nvm.sh'
+declare -r _NVM_PROFILE="$APPS_HOME/etc/profile.d/nvm.sh"
 
 _install_nvm() {
   local orig_pwd="$PWD"

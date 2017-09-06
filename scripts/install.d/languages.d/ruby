@@ -2,10 +2,10 @@
 #
 # Install rbenv and the latest Ruby version
 
-declare -r _RBENV_ROOT="$APP_SYS_ROOT/rbenv"
-declare -r _RBENV_VERSION='v1.0.0'
-declare -r _RUBY_BUILD_VERSION='v20160228'
-declare -r _RBENV_PROFILE='/etc/profile.d/rbenv.sh'
+declare -r _RBENV_ROOT="$APPS_HOME/rbenv"
+declare -r _RBENV_VERSION='v1.1.1'
+declare -r _RUBY_BUILD_VERSION='v20170726'
+declare -r _RBENV_PROFILE="$APPS_HOME/etc/profile.d/rbenv.sh"
 
 _install_rbenv() {
   local orig_pwd="$PWD"
@@ -32,8 +32,8 @@ _install_rbenv() {
 _install_ruby() {
   _install_rbenv
   . "$_RBENV_PROFILE"
-  rbenv install "$_RUBY_VERSION"
-  rbenv global "$_RUBY_VERSION"
+  rbenv install "$RUBY_VERSION"
+  rbenv global "$RUBY_VERSION"
   gem install bundler colorator
 }
 
