@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+#
+# Thanks to: http://www.jurta.org/en/prog/noblink
+
+DEV_FILE='/sys/class/graphics/fbcon/cursor_blink'
+
+stop_using_dev_file() {
+  echo 0 > '/sys/class/graphics/fbcon/cursor_blink'
+}
+
+if [[ -e "$DEV_FILE" ]]; then
+  sudo stop_using_dev_file
+else
+  printf '\033[?17;0;127c\n'
+fi
